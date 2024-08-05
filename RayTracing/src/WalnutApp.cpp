@@ -17,6 +17,22 @@ public:
 		if (ImGui::Button("Render")) {
 			Render();
 		}
+
+		auto sphereColor = m_Renderer.GetSphereColor();
+		if (sphereColor)
+		{
+			ImGui::SliderFloat("Red", &sphereColor->r, 0.0f, 1.0f, "%.2f", 0);
+			ImGui::SliderFloat("Green", &sphereColor->g, 0.0f, 1.0f, "%.2f", 0);
+			ImGui::SliderFloat("Blue", &sphereColor->b, 0.0f, 1.0f, "%.2f", 0);
+		}
+
+		auto lightDir = m_Renderer.GetLightDir();
+		if (lightDir)
+		{
+			ImGui::SliderFloat("Light X", &lightDir->x, -1.0f, 1.0f, "%.2f", 0);
+			ImGui::SliderFloat("Light Y", &lightDir->y, -1.0f, 1.0f, "%.2f", 0);
+			ImGui::SliderFloat("Light Z", &lightDir->z, -1.0f, 1.0f, "%.2f", 0);
+		}
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));

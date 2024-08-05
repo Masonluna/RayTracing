@@ -85,12 +85,12 @@ glm::vec4 Renderer::PerPixel(glm::vec2 coord)
 	glm::vec3 hitPoint = rayOrigin + rayDirection * closestT;
 	glm::vec3 normal = glm::normalize(hitPoint);
 	
-	glm::vec3 lightDir = glm::normalize(glm::vec3(-1, -1, -1));
+	glm::vec3 lightDir = *m_LightDir.get();
+	lightDir = glm::normalize(lightDir);
 
 	float d = glm::max(glm::dot(normal, -lightDir), 0.0f); // == cos(angle between light dir and object normal)
 
-
-	glm::vec3 sphereColor(1, 0, 1);
+	glm::vec3 sphereColor = *m_SphereColor.get();
 	sphereColor *= d;
 	return glm::vec4(sphereColor, 1.0f);
 }
