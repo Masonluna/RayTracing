@@ -4,12 +4,37 @@
 #include "Walnut/Image.h"
 #include "Walnut/Timer.h"
 #include "Renderer.h"
+#include "Camera.h"
 
+#include <glm/gtc/type_ptr.hpp>
 using namespace Walnut;
 
 class ExampleLayer : public Walnut::Layer
 {
 public:
+	ExampleLayer() : m_Camera(45.0, 0.1f, 100.0f)
+	{
+		{
+			Sphere sphere;
+			sphere.Position = { 0.0f, 0.0f, 0.0f };
+			sphere.Radius = 0.5f;
+			sphere.Albedo = { 1.0f, 1.0f, 1.0f };
+			m_Scene.Spheres.push_back(sphere);
+		}
+
+		{
+			Sphere sphere;
+			sphere.Position = { 1.0f, 0.0f, -5.0f };
+			sphere.Radius = 1.5f;
+			sphere.Albedo = { 0.2f, 0.3f, 1.0f };
+			m_Scene.Spheres.push_back(sphere);
+		}
+	}
+	virtual void OnUpdate(float ts) override 
+	{
+		m_Camera.OnUpdate(ts);
+	}
+
 	virtual void OnUIRender() override
 	{
 		ImGui::Begin("Settings");
@@ -17,22 +42,12 @@ public:
 		if (ImGui::Button("Render")) {
 			Render();
 		}
+		ImGui::End();
 
-		auto sphereColor = m_Renderer.GetSphereColor();
-		if (sphereColor)
-		{
-			ImGui::SliderFloat("Red", &sphereColor->r, 0.0f, 1.0f, "%.2f", 0);
-			ImGui::SliderFloat("Green", &sphereColor->g, 0.0f, 1.0f, "%.2f", 0);
-			ImGui::SliderFloat("Blue", &sphereColor->b, 0.0f, 1.0f, "%.2f", 0);
-		}
-
-		auto lightDir = m_Renderer.GetLightDir();
-		if (lightDir)
-		{
-			ImGui::SliderFloat("Light X", &lightDir->x, -1.0f, 1.0f, "%.2f", 0);
-			ImGui::SliderFloat("Light Y", &lightDir->y, -1.0f, 1.0f, "%.2f", 0);
-			ImGui::SliderFloat("Light Z", &lightDir->z, -1.0f, 1.0f, "%.2f", 0);
-		}
+		ImGui::Begin("Scene");
+		ImGui::DragFloat3("Position", glm::value_ptr(m_Scene.Spheres[0].Position), 0.1f);
+		ImGui::DragFloat("Radius", &m_Scene.Spheres[0].Radius, 0.1f);
+		ImGui::ColorEdit3("Albedo", glm::value_ptr(m_Scene.Spheres[0].Albedo));
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -56,18 +71,18 @@ public:
 	{
 		Timer timer;
 
-		// Renderer resize;
 		m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
-		// Renderer render;
-		m_Renderer.Render();
+		m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
+		m_Renderer.Render(m_Scene, m_Camera);
 
 		m_LastRenderTime = timer.ElapsedMillis();
 	}
 
 private:
 	Renderer m_Renderer;
+	Camera m_Camera;
+	Scene m_Scene;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-
 	float m_LastRenderTime = 0.0f;
 };
 
